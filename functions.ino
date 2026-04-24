@@ -99,7 +99,7 @@ void aimBall(){
   clearsamples();
   readIR();
   int loopCount = 0;
-  const int MAX_LOOPS = 150;
+  const int MAX_LOOPS = 400;
   while(readIR() != 6){
     int ir = readIR();
 
