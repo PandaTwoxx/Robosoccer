@@ -1,3 +1,47 @@
+// code to detect ze blindspot issues
+
+#define BLINDSPOT_CHECK 20
+int irSamples[BLINDSPOT_CHECK];
+int sampleIndex = 0;
+
+void clearsamples() {
+  sampleIndex = 0;
+  for(int i = 0; i < BLINDSPOT_CHECK; i++) {
+    irSamples[i] = -1;
+  }
+}
+
+int getIRSpread() {
+  int mi = 255, ma = 0;
+  int count = 0;
+
+  for(int i = 0; i < BLINDSPOT_CHECK; i++) {
+    if(irSamples[i] >= 0 && irSamples[i] <= 11) {
+      count++;
+      if(irSamples[i] < mi) mi = irSamples[i];
+      if(irSamples[i] > ma) ma = irSamples[i];
+    }
+  }
+  
+  if(count < 4) return 0;
+  
+  return ma - mi;
+}
+
+bool checkBlindSpot() {
+  return getIRSpread() > 5;
+}
+
+void blindspot(){
+  stop();
+  move(0, 70, 0);
+  delay(400);
+  stop();
+  resetIRSamples();
+}
+
+// code to score
+
 void faceGoal(){
   int x = readIMU();
   if(x < 0){
@@ -52,14 +96,31 @@ void moveAngle(int angle, int speed, int rotation){
 }
 
 void aimBall(){
+  resetIRSamples();
   readIR();
-  if(irSensor == 255) move(0, 50, 0);
-  if(irSensor < 6){
-    move(0, 0, -50);
-  }else{
-    move(0, 0, 50);
+  int loopCount = 0;
+  const int MAX_LOOPS = 150;
+  while(readIR() != 6){
+    int ir = readIR();
+    
+    irSamples[sampleIndex % IR_SAMPLES] = ir;
+    sampleIndex++;
+
+    if(checkBlindSpot() || loopCount > MAX_LOOPS){
+      blindspot();
+      loopCount = 0;
+    }
+    if(ir == 255) {
+      move(0, 50, 0);
+    } else if(ir < 6) {
+      move(0, 0, 50);
+    } else {
+      move(0, 0, -50);
+    }
+
+    loopCount++;
+    delay(20);
   }
-  while(readIR() != 6){}
   stop();
 }
 
@@ -71,13 +132,25 @@ void score(){
 void getBall(){
   aimBall();
   bool setNext = false;
+  int blindspotCount = 0;
+  const int MAX_BLINDSPOTS = 5;
   while(!limitPressed()){
-    if(readIR() != 6){
+    int ir = readIR();
+    irSamples[sampleIndex % IR_SAMPLES] = ir;
+    sampleIndex++;
+    if(ir != 6){
+      if(checkBlindSpot() && blindspotCount < MAX_BLINDSPOTS){
+        blindspot();
+        blindspotCount++;
+        continue;
+      }
       aimBall();
       move(0, 120, 0);
       delay(300);
     }else{
-      delay(300);
+      move(0, 120, 0);
+      delay(100);
+      blindspotCount = 0;
     }
   }
   stop();
