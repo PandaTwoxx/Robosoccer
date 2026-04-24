@@ -37,7 +37,7 @@ void blindspot(){
   move(0, 70, 0);
   delay(400);
   stop();
-  resetIRSamples();
+  clearsamples();
 }
 
 // code to score
@@ -96,14 +96,14 @@ void moveAngle(int angle, int speed, int rotation){
 }
 
 void aimBall(){
-  resetIRSamples();
+  clearsamples();
   readIR();
   int loopCount = 0;
   const int MAX_LOOPS = 150;
   while(readIR() != 6){
     int ir = readIR();
-    
-    irSamples[sampleIndex % IR_SAMPLES] = ir;
+
+    irSamples[sampleIndex % BLINDSPOT_CHECK] = ir;
     sampleIndex++;
 
     if(checkBlindSpot() || loopCount > MAX_LOOPS){
@@ -136,7 +136,7 @@ void getBall(){
   const int MAX_BLINDSPOTS = 5;
   while(!limitPressed()){
     int ir = readIR();
-    irSamples[sampleIndex % IR_SAMPLES] = ir;
+    irSamples[sampleIndex % BLINDSPOT_CHECK] = ir;
     sampleIndex++;
     if(ir != 6){
       if(checkBlindSpot() && blindspotCount < MAX_BLINDSPOTS){
