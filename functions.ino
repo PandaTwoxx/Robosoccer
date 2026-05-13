@@ -83,12 +83,12 @@ void moveToGoal(){
   faceGoal();
   
   int frontStride = readUltrasonicF();
-  while(frontStride > 45){
+  while(frontStride > 75){
     shiftToGoal(frontStride-30);
     frontStride = readUltrasonicF();
   }
 
-  shiftToGoal(15);
+  shiftToGoal(45);
 }
 
 void moveAngle(int angle, int speed, int rotation){
@@ -99,7 +99,7 @@ void aimBall(){
   clearsamples();
   readIR();
   int loopCount = 0;
-  const int MAX_LOOPS = 400;
+  const int MAX_LOOPS = 150;
   while(readIR() != 6){
     int ir = readIR();
 
