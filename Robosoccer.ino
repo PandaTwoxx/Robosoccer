@@ -12,6 +12,7 @@ void setup() {
   ultrasonicSetup();
   limitSetup();
   motorSetup();
+  reflectanceSetup();
 
   Serial.println("READY");
 
@@ -29,11 +30,11 @@ void loop() {
 
   //faceGoal();
 
-  score();
-
-  // first value is speed of left-right, second is speed of forward-backward, third is rotation speed
-  delay(2000);
-
+  //score();
+  //move(0, -100, 0);
+  //delay(500);
+  //stop();
+  Serial.println(readIR());
 }
 
 

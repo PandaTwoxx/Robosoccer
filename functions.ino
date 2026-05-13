@@ -35,14 +35,14 @@ bool checkBlindSpot() {
 void blindspot(){
   stop();
   move(0, 70, 0);
-  delay(400);
+  delay(700);
   stop();
   clearsamples();
 }
 
 // code to score
 
-void faceGoal(){
+bool faceGoal(){
   int x = readIMU();
   if(x < 0){
     move(0, 50, -50);
@@ -54,8 +54,9 @@ void faceGoal(){
 
   Serial.println("Moving to goal");
 
-  while(readIMU() > 5 || readIMU() < -5);
+  while((readIMU() > 5 || readIMU() < -5) && limitPressed());
   stop();
+  return limitPressed();
 }
 
 int fieldWidth = 180;
@@ -80,7 +81,7 @@ void shiftToGoal(int distance){
 }
 
 void moveToGoal(){
-  faceGoal();
+  if(!faceGoal())return;
   
   int frontStride = readUltrasonicF();
   while(frontStride > 75){
