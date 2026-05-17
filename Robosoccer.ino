@@ -1,45 +1,38 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-int irthingy;
+int irSensor = 0;
 
-void Goaliesetup() {
+void setup() {
   Serial.begin(115200);
-  Serial.println("STARTING GOALIE");
+  // put your setup code here, to run once:
+  Serial.println("STARTING");
   imuSetup();
   irSetup();
   ultrasonicSetup();
   limitSetup();
   motorSetup();
   reflectanceSetup();
-  Serial.println("READY GOALIE");
+
+  Serial.println("READY");
+
+  //moveToGoal();
+  //delay(5000);
+  
 }
 
-void Goalieloop() {
-    while (readReflectance() == true){
-      Serial.print("hi");
-      irthingy = readIR();
-      if (irthingy == 4 or irthingy == 5){
-        move(50, 50, 0);
-      } else if (irthingy == 10 or irthingy ==11){
-        move(-50,-50, 0);
-      } else if (irthingy == 9){
-        move(-50, 0, 0);
-      } else if (irthingy == 0){
-        move(0, -50, 0);
-      } else if (irthingy ==6){
-        move(0, 50, 0);
-      } else if (irthingy == 7 or irthingy == 8){
-        move(-50, 50, 0);
-      } else if (irthingy == 1 or irthingy == 2){
-        move(50, -50, 0);
-      } else if (irthingy ==3){
-        move(50, 0, 0);
-      } else{
-        stop();
-      }
+void loop() {
+  //aimBall();
 
-    
+  //Serial.println(readIR());
+  //defend();
+
+  //moveToGoal();
+
+  //faceGoal();
+
+  score();
+  move(0, -100, 0);
   delay(2000);
-    }
+  stop();
 }

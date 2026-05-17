@@ -66,13 +66,14 @@ void shiftToGoal(int distance){
   
   int sideStride = readUltrasonicL();
   int targetStride = fieldWidth / 2 - 4;
+  int loopCount = 0;
   if(sideStride > targetStride){
     move(50, 50, 0);
-    while(readUltrasonicL() > targetStride){}
+    while(readUltrasonicL() > targetStride && loopCount < 300 && readUltrasonicF() < 20){loopCount++; delay(20);}
     stop();
   }else if(sideStride < targetStride){
     move(-50, 50, 0);
-    while(readUltrasonicL() < targetStride){}
+    while(readUltrasonicL() < targetStride && loopCount < 300 && readUltrasonicF() < 20){loopCount++; delay(20);}
     stop();
   }
   move(0, 140, 0);
@@ -100,14 +101,14 @@ void aimBall(){
   clearsamples();
   readIR();
   int loopCount = 0;
-  const int MAX_LOOPS = 150;
+  const int MAX_LOOPS = 75;
   while(readIR() != 6){
     int ir = readIR();
 
     irSamples[sampleIndex % BLINDSPOT_CHECK] = ir;
     sampleIndex++;
 
-    if(checkBlindSpot() || loopCount > MAX_LOOPS){
+    if((checkBlindSpot() || loopCount > MAX_LOOPS) && readUltrasonicF() > 20){
       blindspot();
       loopCount = 0;
     }
@@ -120,6 +121,7 @@ void aimBall(){
     }
 
     loopCount++;
+    if(readUltrasonicF() < 20) move(0, -100, 0);
     delay(20);
   }
   stop();
@@ -134,25 +136,27 @@ void getBall(){
   aimBall();
   bool setNext = false;
   int blindspotCount = 0;
-  const int MAX_BLINDSPOTS = 5;
   while(!limitPressed()){
     int ir = readIR();
     irSamples[sampleIndex % BLINDSPOT_CHECK] = ir;
     sampleIndex++;
     if(ir != 6){
-      if(checkBlindSpot() && blindspotCount < MAX_BLINDSPOTS){
+      if(checkBlindSpot()){
         blindspot();
         blindspotCount++;
         continue;
       }
       aimBall();
-      move(0, 120, 0);
+      if(readUltrasonicF() < 20) move(0, -100, 0);
+      else move(0, 120, 0);
       delay(300);
     }else{
-      move(0, 120, 0);
+      if(readUltrasonicF() < 10) move(0, -100, 0);
+      else move(0, 120, 0);
       delay(100);
       blindspotCount = 0;
     }
+    if(readUltrasonicF() < 10) move(0, -100, 0);
   }
   stop();
 }
